@@ -22,7 +22,7 @@
 
 - `handler.sendEmptyMessage()`
 
-- 使用AsyncTask子类, 被弃用
+- ~~使用AsyncTask子类, 被弃用~~
 
   > **This class was deprecated in API level 30.**
   > Use the standard `java.util.concurrent` or [Kotlin concurrency utilities](https://developer.android.google.cn/topic/libraries/architecture/coroutines) instead.
@@ -61,15 +61,69 @@ class LooperThread extends Thread {
 
 ### 服务概述
 
-分为 启动服务 和 绑定服务
+Service是Android中实现程序后台运行的解决方案 
 
-启动服务分为前台和后台服务
+Service的运行不依赖于任何用户界面，即使程序被切换到后台, Service仍然能够保持正常运行 
 
-服务可以同时为启动和绑定两种状态
+服务依赖于创建服务时所在的应用进程
+
+服务默认运行在主线程当中
+
+ 需要在Service的内部手动创建子线程 , 否则就有可能出现主线程被阻塞的情况 
 
 
 
-### 启动服务
+按生命周期分为 **启动服务** 和 **绑定服务**
+
+启动服务按运行状态分为 **前台服务** 和 **后台服务**
+
+服务可以同时为**启动和绑定**两种状态
+
+
+
+### 服务的生命周期
+
+#### 启动服务的周期
+
+该服务在其他组件调用 `startService()` 时创建，然后无限期运行，且必须通过调用 `stopSelf()` 来自行停止运行
+
+此外，其他组件也可通过调用 `stopService()` 来停止此服务
+
+服务停止后，系统会将其销毁。
+
+#### 绑定服务的周期
+
+该服务在其他组件（客户端）调用 `bindService()` 时创建。然后，客户端通过 `IBinder` 接口与服务进行通信。客户端可通过调用 `unbindService()` 关闭连接。多个客户端可以绑定到相同服务，而且当所有绑定全部取消后，系统即会销毁该服务。（服务*不必*自行停止运行。）
+
+#### 启动加绑定的服务的周期
+
+即使所有客户端解绑, 还是要使用`stopService()`来停止服务
+
+#### 服务周期的回调
+
+![img](https://developer.android.google.cn/images/service_lifecycle.png)
+
+
+
+一个应用进程中一个service只有一个实例
+
+`onCreate()`只会在第一次启动服务时调用
+
+第一次启动服务时先调用`oncreate()`然后是`onStartCommand()`
+
+多个服务启动请求会导致多次对服务的 `onStartCommand()` 进行相应的调用。
+
+如要停止服务，只需一个服务停止请求（使用 `stopSelf()` 或 `stopService()`）即可, 此时服务中的`onDestroy()`会被执行
+
+### 服务的创建和使用
+
+服务需要在manifest中注册, 并在其中修改service的属性
+
+> Exported属性表示是否将这个Service暴露给外部其他程序访问
+>
+> Enabled属性表示是否启用这个Service 
+
+如果使用Android Studio的新建service功能会自动在manifest里面注册
 
 #### 创建
 
@@ -116,45 +170,57 @@ class LooperThread extends Thread {
    </manifest>
    ```
 
-#### 启动和停止
+#### 启动
 
 ```java
-    Intent startService = new Intent(this, MyService.class);
-    startService(startService);
+Intent startService = new Intent(this, MyService.class);
+startService(startService);
 
-    Intent stopService = new Intent(this, MyService.class);
-    startService(stopService);
+Intent stopService = new Intent(this, MyService.class);
+startService(stopService);
 ```
+
+#### 停止
+
+服务可以调用 `stopSelf()` 来自行停止运行
+
+其他组件也可通过调用 `stopService()` 来停止此服务
+
+
 
 ### 绑定服务
 
+如果要在Activity中指挥Service去干什么 , 就需要使用绑定服务
 
-
-### 服务的绑定状态
-
-需要以下类
+实现绑定服务需要以下类
 
 - Service子类
 - IBinder 实现类
 - ServiceConnection实现类
 
+原理
+
+- 在activity中 调用`bindService(intent, sericeConnection,flag)` 绑定服务
+
+  > 第一个参数就是刚刚构建出的Intent对象
+  >
+  > 第二个参数是前面创建出的ServiceConnection的实例
+  >
+  > 第三个参数则是一个标志位 
+
+- sericeConnection中会获取服务的IBinder
+
 #### 服务绑定步骤
 
 1. service子类必须实现`onBinder()`, 此函数返回一个IBinder实现类
-
 2. 客户端调用 `bindService(intent, sericeConnection,flag)` , 传入ServiceConnection实现类
-
-3. Android 系统创建客户端与服务之间的连接时，会对 `ServiceConnection` 调用 `onServiceConnected()`
-
-   `onServiceConnected()` 方法包含一个 `IBinder` 参数，客户端需要保存此 IBinder 用于和服务通信
-
+3. Android 系统创建客户端与服务之间的连接时，会对 `ServiceConnection` 调用 `onServiceConnected()` , `onServiceConnected()` 方法包含一个 `IBinder` 参数，客户端需要保存此 IBinder 用于和服务通信
 4. 只有在第一个客户端绑定服务时，系统才会调用服务的 `onBind()` 方法来生成 `IBinder`
-
 5. 当最后一个客户端取消与服务的绑定时`unbindService(connection)`，系统会销毁该服务（除非还通过 `startService()` 启动了该服务）
 
 > service的onBinder()返回的IBinder最终在serviceConnection的onServiceConnected()的传入参数获得
 
-#### 服务绑定实践代码
+#### 服务绑定实现代码
 
 service
 
@@ -196,45 +262,15 @@ activity
 
 ### 
 
+### 后台服务
 
+服务默认就是处于后台状态
 
 ### 前台服务
 
 使用前台服务可以防止服务被回收, 会在通知栏显示一条类似通知的信息
 
 
-
-### 服务的生命周期
-
-#### 启动服务的周期
-
-该服务在其他组件调用 `startService()` 时创建，然后无限期运行，且必须通过调用 `stopSelf()` 来自行停止运行。此外，其他组件也可通过调用 `stopService()` 来停止此服务。服务停止后，系统会将其销毁。
-
-#### 绑定服务的周期
-
-该服务在其他组件（客户端）调用 `bindService()` 时创建。然后，客户端通过 `IBinder` 接口与服务进行通信。客户端可通过调用 `unbindService()` 关闭连接。多个客户端可以绑定到相同服务，而且当所有绑定全部取消后，系统即会销毁该服务。（服务*不必*自行停止运行。）
-
-#### 启动加绑定的服务的周期
-
-即使所有客户端解绑, 还是要使用`stopService()`来停止服务
-
-
-
-#### 服务周期的回调
-
-![img](https://developer.android.google.cn/images/service_lifecycle.png)
-
-
-
-一个应用进程中一个service只有一个实例
-
-`onCreate()`只会在第一次启动服务时调用
-
-第一次启动服务时先调用`oncreate()`然后是`onStartCommand()`
-
-多个服务启动请求会导致多次对服务的 `onStartCommand()` 进行相应的调用。
-
-如要停止服务，只需一个服务停止请求（使用 `stopSelf()` 或 `stopService()`）即可, 此时服务中的`onDestroy()`会被执行
 
 ### Fragment
 
