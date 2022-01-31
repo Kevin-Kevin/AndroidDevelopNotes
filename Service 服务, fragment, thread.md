@@ -190,7 +190,9 @@ startService(stopService);
 
 ### 绑定服务
 
-如果要在Activity中指挥Service去干什么 , 就需要使用绑定服务
+> 只有 Activity、服务和内容提供程序可以绑定到服务 , 无法**从广播接收器绑定到服务。 
+
+如果要在组件	中指挥Service去干什么 , 就需要使用绑定服务
 
 实现绑定服务需要以下类
 
@@ -209,6 +211,7 @@ startService(stopService);
   > 第三个参数则是一个标志位 
 
 - sericeConnection中会获取服务的IBinder
+- 调用IBinder的函数来让控制service
 
 #### 服务绑定步骤
 
