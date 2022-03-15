@@ -18,12 +18,11 @@ Android 架构组件是一组库，可帮助您设计稳健、可测试且易维
 
 ```groovy
 android {
-        ...
-        viewBinding {
-            enabled = true
-        }
+    ...
+    buildFeatures {
+        viewBinding true
     }
-    
+}
 ```
 
 如果您希望在生成绑定类时忽略某个布局文件，请将 `tools:viewBindingIgnore="true"` 属性添加到相应布局文件的根视图中：
@@ -39,21 +38,17 @@ android {
 
 #### 使用viewbinding
 
-为某个模块启用视图绑定功能后，系统会为该模块中包含的每个 XML 布局文件生成一个绑定类。每个绑定类均包含对根视图以及具有 ID 的所有视图的引用。系统会通过以下方式生成绑定类的名称：将 XML 文件的名称转换为驼峰式大小写，并在末尾添加“Binding”一词。
+为某个模块启用视图绑定功能后，系统会为该模块中包含的每个 XML 布局文件生成一个绑定类
 
-例如，假设某个布局文件的名称为 `result_profile.xml`：
+每个绑定类均包含对根视图以及具有 ID 的所有视图的引用
 
-```xml
-<LinearLayout ... >
-        <TextView android:id="@+id/name" />
-        <ImageView android:cropToPadding="true" />
-        <Button android:id="@+id/button"
-            android:background="@drawable/rounded_button" />
-    </LinearLayout>
-    
-```
+系统会通过以下方式生成绑定类的名称：将 XML 文件的名称转换为驼峰式大小写，并在末尾添加“Binding”一词。
 
-所生成的绑定类的名称就为 `ResultProfileBinding`。此类具有两个字段：一个是名为 `name` 的 `TextView`，另一个是名为 `button` 的 `Button`。该布局中的 `ImageView` 没有 ID，因此绑定类中不存在对它的引用。
+> 例如，假设某个布局文件的名称为 `result_profile.xml`：
+>
+> 所生成的绑定类的名称就为 `ResultProfileBinding`
+>
+> 若其中的`View` 没有 ID，绑定类中不存在对它的引用。
 
 每个绑定类还包含一个 `getRoot()` 方法，用于为相应布局文件的根视图提供直接引用。在此示例中，`ResultProfileBinding` 类中的 `getRoot()` 方法会返回 `LinearLayout` 根视图。
 
@@ -91,3 +86,30 @@ android {
 ```
 
 ##### 在Fragment中使用
+
+```java
+private ResultProfileBinding binding;
+
+@Override
+public View onCreateView (LayoutInflater inflater,
+                          ViewGroup container,
+                          Bundle savedInstanceState) {
+    binding = ResultProfileBinding.inflate(inflater, container, false);
+    View view = binding.getRoot();
+    return view;
+}
+
+@Override
+public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+}
+```
+
+```java
+binding.getName().setText(viewModel.getName());
+binding.button.setOnClickListener(new View.OnClickListener() {
+    viewModel.userClicked()
+});
+```
+
