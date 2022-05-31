@@ -15,11 +15,37 @@ Acitvity
 
 ### view的绘制流程
 
+![image-20220516162051205](自定义View开发.assets/image-20220516162051205.png)
+
+> android开发艺术探索
+
+
+
+![image-20220510145950812](自定义View开发.assets/image-20220510145950812.png)
+
+> << andriod群英传 >>
+
 #### measure() : 计算view的尺寸
 
 `measure()`中通过调用view的`onMeasure()`来计算view的尺寸
 
 可以重写`onMeasure()`来自定义测量过程
+
+MeasureSpec类可以帮助测量View
+
+![image-20220510155619540](自定义View开发.assets/image-20220510155619540.png)
+
+>  << android高级进阶 >>
+
+view的measureSpec由其layoutParams和父容器一起决定
+
+顶级view(Decorview)则由其layoutParams和窗口尺寸决定
+
+view在xml中可设置width和height 为 
+
+match_parent , wrap_content 和 具体大小dp(px ...)
+
+wrap_content时需要测量内部大小
 
 ##### 文本尺寸的测量
 
@@ -27,9 +53,23 @@ Acitvity
 
 ##### 布局尺寸测量
 
-#### layout() : 用来确定view在父容器中的布局位置
 
-#### draw()
+
+#### layout() 
+
+用来确定view的位置
+
+#### onLayout()
+
+确定view的子layout的布局位置
+
+#### onDraw() : 绘制view
+
+在参数canvas上绘制view
+
+尽量不要在onDraw中new对象
+
+
 
 
 
@@ -39,7 +79,7 @@ xml
 
 customView class
 
-
+### layout parameter
 
 
 
@@ -99,17 +139,17 @@ Rect和RectF可以互相转换, 但是 float 和 int转换会有取舍问题
 >
 > 很多时候如果需要在 Android 中对图片进行处理，需要先将图片读入 Bitmap 对象，接着调用相关的 API 对图片进行处理和加工
 
-###### 读取
+1 读取
 
 图片读取操作是由 BitmapFactory 类完成的, 可以从inputstream, byteArray, resource, file中读取, 生成bitmap
 
-###### 创建
+2 创建
 
 也可以创建bitmap对象
 
 `Bitmap bmp = Bitmap.createBitmap(400, 400, Config. ARGB_8888);`
 
-###### 修改
+3 修改
 
 位于 res/drawable 目录下的图片读成 Bitmap 对象后是无法修改的，若要修改必须复制一张新的图片并设置可修改标记, 使用Bitmap 类的 copy()
 
@@ -118,7 +158,7 @@ public Bitmap copy(Config config, boolean isMutable)
 //参数 isMutable 为 true 表示复制的新位图可以修改。
 ```
 
-###### 回收
+4 回收
 
 Bitmap 是一种非常占用资源的对象, 要及时回收
 
@@ -134,13 +174,7 @@ if(bmp!= null && !bmp.isRecycled()){
 // 所以可以不判空
 ```
 
-###### 和bitmapDrawable的相互转换
-
-BitmapDrawable 的构造方法 `public BitmapDrawable(Resources res, Bitmap bitmap)`用于将Bitmap转换成BitmapDrawable
-
-而`bitmapDrawable.getBitmap()`方法则用于将 BitmapDrawable 转换成 Bitmap
-
-###### 宽度和高度
+5 宽度和高度
 
 Bitmap 和 BitmapDrawable 都能获得位图的宽度和高度
 
@@ -152,16 +186,28 @@ BimapDrawable 占用资源更少、性能更高 (和 Bitmap 相比 )
 
 Bitmap 和 BitmapDrawable 可以相互转换
 
+`public BitmapDrawable(Resources res, Bitmap bitmap)`
+
+`bitmapDrawable.getBitmap()`
+
 #### Canvas和Paint
 
 - Canvas
 
   提供了若干方法用于绘制各
-  种图形图案——点、线、圆等等。
+  种图形图案——点、线、圆等等
+
+  坐标以此view的左上角为(0,0),单位是px
 
 - Paint
 
   Paint 类用于定义绘图时的参数，主要包含颜色、文本、图形样式、位图模式、滤镜等 (paint的reset()可以重置参数,不用每次都用新的paint)
+
+##### paint
+
+可以设置画笔的样式, 空心实心, 线条粗细, 阴影, 拐角, 两端样式, 双线性过滤, 特效
+
+paint可以设置抗锯齿
 
 paint和canvas联动
 
@@ -202,26 +248,34 @@ canvas.drawRect(new Rect(10, 200, 350, 350), paint);
 
   可以通过path绘制出多种形状的线条
 
-  包括 矩形, 椭圆, 弧, 曲线, 贝塞尔曲线
-
-  > Path 类支持二阶贝塞尔曲线和三阶贝塞尔曲线
-  >
-  > 贝塞尔曲线通过 3 个点来绘制一条平滑的曲线，这 3 个点分别是起点、控制点和终点
-  >
-  > 贝塞尔的曲线绘制有点复杂, 参阅<<android自定义组件开发详解>>
-
-  多个path图形可以进行运算
-
-  ```java
-  Path path = new Path();
-  canvas.drawPath(path, paint);
-  ```
-
-  
+  drawPath()
 
 - 文字
 
   Canvas 为我们提供了两组方法，一组直接从指定的位置开始绘制文字，另一组沿着 Path 绘制文字：
+
+#### Path
+
+可以通过path绘制出多种形状的线条
+
+包括 矩形, 椭圆, 弧, 曲线, 贝塞尔曲线
+
+> Path 类支持二阶贝塞尔曲线和三阶贝塞尔曲线
+>
+> 贝塞尔曲线通过 3 个点来绘制一条平滑的曲线，这 3 个点分别是起点、控制点和终点
+>
+> 贝塞尔的曲线绘制有点复杂, 参阅<<android自定义组件开发详解>>
+
+多个path图形可以进行运算
+
+```java
+Path path = new Path();
+canvas.drawPath(path, paint);
+```
+
+
+
+
 
 ### 使用 Graphics2D 实现 动态 效果
 
@@ -239,7 +293,7 @@ View类的invalidate()用于重绘组件，不带参数表示重绘整个视图�
 
 #### 画布中的坐标转换
 
-默认情况下，画布坐标的原点就是绘图区的左上角
+默认情况下，画布坐标的**原点**就是绘图区的**左上角**
 
 > 向左为负，向右为正，向上为负，向下为正
 

@@ -1,4 +1,4 @@
-## Services 服务, fragment, thread
+## Services 服务, thread
 
  `Service` 是一种可在后台执行长时间运行操作而不提供界面的应用组件。
 
@@ -9,6 +9,10 @@
 >  服务在其托管进程的主线程中运行，它既**不**创建自己的线程，也**不**在单独的进程中运行（除非另行指定） 
 
 ### 在子线程中更新UI
+
+![image-20220513190737669](Service 服务, fragment, thread.assets/image-20220513190737669.png)
+
+> <<Android开发艺术探索>>
 
 可以使用以下函数更新
 
@@ -31,13 +35,29 @@
 
 #### handler 消息机制
 
-![image-20210820185729520](https://gitee.com/kevinzhang1999/my-picture/raw/master/uPic/image-20210820185729520-1629457049881.png)
+![image-20210820185729520](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210820185729520-1629457049881.png)
+
+![image-20220513190120030](Service 服务, fragment, thread.assets/image-20220513190120030.png)
 
 每个线程各自的 looper 从各自的 messageQueue 中取出 message
 
 一个 handler 和一个 looper 绑定, 可以通过 handler 发送 message 给 looper 所属的线程, 并且handler 的`run()`负责处理发送给本线程的 message
 
 ui 主线程自带一个 looper, 其余线程必须自己创建并启动 looper
+
+Looper内部使用了threadLocal来记录不同线程对应的looper
+
+#### handler的使用
+
+![image-20220513191102569](Service 服务, fragment, thread.assets/image-20220513191102569.png)
+
+> Android开发艺术探索
+
+thread1调用thread2的handler 发送消息给 MessageQueue
+
+实际上是thread1调用 MessageQueue的enqueueMessage方法
+
+thread2的looper就会注意到消息并处理
 
 ```java
 // 一个Looper线程实现的典型例子
@@ -58,6 +78,8 @@ class LooperThread extends Thread {
       }
   }
 ```
+
+
 
 ### 服务概述
 
@@ -112,6 +134,10 @@ Service的运行不依赖于任何用户界面，即使程序被切换到后台,
 第一次启动服务时先调用`oncreate()`然后是`onStartCommand()`
 
 多个服务启动请求会导致多次对服务的 `onStartCommand()` 进行相应的调用。
+
+> `onStartCommand()`的返回值说明
+>
+> ![image-20220519191718540](Service 服务, thread.assets/image-20220519191718540.png)
 
 如要停止服务，只需一个服务停止请求（使用 `stopSelf()` 或 `stopService()`）即可, 此时服务中的`onDestroy()`会被执行
 
@@ -190,9 +216,11 @@ startService(stopService);
 
 ### 绑定服务
 
-> 只有 Activity、服务和内容提供程序可以绑定到服务 , 无法**从广播接收器绑定到服务。 
+通过绑定服务可以实现其他组件和服务的通信
 
-如果要在组件	中指挥Service去干什么 , 就需要使用绑定服务
+> 只有 Activity、服务和内容提供程序可以绑定到服务 , 无法从广播接收器绑定到服务。 
+
+如果要在组件中指挥Service去干什么 , 就需要使用绑定服务
 
 实现绑定服务需要以下类
 
@@ -202,7 +230,7 @@ startService(stopService);
 
 原理
 
-- 在activity中 调用`bindService(intent, sericeConnection,flag)` 绑定服务
+- 在activity中 调用`bindService(intent, serviceConnection,flag)` 绑定服务
 
   > 第一个参数就是刚刚构建出的Intent对象
   >
@@ -210,8 +238,13 @@ startService(stopService);
   >
   > 第三个参数则是一个标志位 
 
-- sericeConnection中会获取服务的IBinder
-- 调用IBinder的函数来让控制service
+- ServiceConnection中会获取服务的IBinder
+
+- 调用IBinder的函数来对service的数据进行操作
+
+> IBinder的函数在activity中调用, 那就在主线程中运行, 并不能实现说主线程直接调用函数, 然后就在服务中运行此函数
+>
+> 若要实现主线程通知服务运行一段代码如runnable, 需要在服务的回调函数中开启子线程, 子线程中开启looper
 
 #### 服务绑定步骤
 
@@ -273,7 +306,20 @@ activity
 
 使用前台服务可以防止服务被回收, 会在通知栏显示一条类似通知的信息
 
+注意，从Android 9.0开始, 需修改AndroidManifest.xml，添加如下权限：
 
+```xml
+<!-- 允许前台服务 -->
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+```
 
+- startForeground：把当前服务切换到前台运行
 
+  第一个参数表示通知的编号
+
+  第二个参数表示 Notification对象，意味着切换到前台就是展示到通知栏
+
+- stopForeground：停止前台运行
+
+  参数为true表示清除通知，参数为false表示不清除
 

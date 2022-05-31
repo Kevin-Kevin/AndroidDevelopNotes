@@ -34,15 +34,22 @@ class ExampleFragment extends Fragment {
 
 #### 把 fragment 添加到 activity
 
-fragment必须嵌入到 AndroidX  FragmentActivity 才能提供ui显示, 而AppCompatActivity 是FragmentActivity的子类, 可以放入AppCompatActivity
+fragment必须嵌入到 AndroidX  FragmentActivity 才能提供ui显示,
+
+> AppCompatActivity 是FragmentActivity的子类
+>
+> fragment可以放入AppCompatActivity
 
 ### 添加fragment
 
 #### 通过 XML 添加
 
-要以声明方式将片段添加到活动布局的 XML，请使用 `FragmentContainerView`元素。
+使用 `FragmentContainerView`元素
+
+ android:name指定元素的fragment类
 
 ```xml
+
 <!-- res/layout/example_activity.xml -->
 <androidx.fragment.app.FragmentContainerView
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -56,13 +63,13 @@ fragment必须嵌入到 AndroidX  FragmentActivity 才能提供ui显示, 而AppC
 
 如果通过代码动态添加就不要在xml中设置android:name属性
 
-```
-    if(savedInstanceState == null){
-      getSupportFragmentManager().beginTransaction()
-              .setReorderingAllowed(true)
-              .add(R.id.main_my_fragment_code,MyFragment.class,null)
-              .commit();
-    }
+```java
+if(savedInstanceState == null){
+    getSupportFragmentManager().beginTransaction()
+        .setReorderingAllowed(true)
+        .add(R.id.main_my_fragment_code,MyFragment.class,null)
+        .commit();
+}
 ```
 
 ### Fragment的生命周期
@@ -99,7 +106,32 @@ Fragment 库提供了方便使用的基于fragment的类：
 
 2. 在 Fragment 中访问
 
-   Fragment 也能够托管一个或多个子 Fragment。在 Fragment 内，您可以通过 [`getChildFragmentManager()`](https://developer.android.com/reference/androidx/fragment/app/Fragment?hl=zh-cn#getChildFragmentManager()) 获取对管理 Fragment 子级的 `FragmentManager` 的引用。如果您需要访问其宿主 `FragmentManager`，可以使用 [`getParentFragmentManager()`](https://developer.android.com/reference/androidx/fragment/app/Fragment?hl=zh-cn#getParentFragmentManager())。
+   Fragment 也能够托管一个或多个子 Fragment
+   
+   在 Fragment 内，通过 [`getChildFragmentManager()`](https://developer.android.com/reference/androidx/fragment/app/Fragment?hl=zh-cn#getChildFragmentManager()) 获取对管理 Fragment 子级的 `FragmentManager` 的引用
+   
+   如果您需要访问fragment的宿主 `FragmentManager`，可以使用 [`getParentFragmentManager()`](https://developer.android.com/reference/androidx/fragment/app/Fragment?hl=zh-cn#getParentFragmentManager())。
+
+##### 使用 FragmentManager
+
+ 调用 [`FragmentManager.popBackStack()`](https://developer.android.com/reference/androidx/fragment/app/FragmentManager?hl=zh-cn#popBackStack()) 时，最上面的 Fragment 事务会从堆栈中弹出 
+
+ 对事务调用 [`addToBackStack()`](https://developer.android.com/reference/androidx/fragment/app/FragmentTransaction?hl=zh-cn#addToBackStack(java.lang.String)) 时，请注意，事务可以包括任意数量的操作，如添加多个 Fragment、替换多个容器中的 Fragment，等等。弹出返回堆栈时，所有这些操作会作为一项原子化操作反转 
+
+##### 执行事务
+
+ 使用 `FragmentManager` 创建 `FragmentTransaction`
+
+在事务transaction中，可以对容器执行 [`add()`](https://developer.android.com/reference/androidx/fragment/app/FragmentTransaction?hl=zh-cn#add(int, java.lang.Class, android.os.Bundle)) 或 [`replace()`](https://developer.android.com/reference/androidx/fragment/app/FragmentTransaction?hl=zh-cn#replace(int, java.lang.Class, android.os.Bundle)) 操作。 
+
+```java
+FragmentManager fragmentManager = getSupportFragmentManager();fragmentManager.beginTransaction()    .replace(R.id.fragment_container, ExampleFragment.class, null)    
+    .setReorderingAllowed(true)    
+    .addToBackStack("name") // name can be null    
+    .commit();
+```
+
+
 
 #### 保存fragment的状态
 

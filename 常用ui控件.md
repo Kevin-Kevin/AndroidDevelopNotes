@@ -1,10 +1,18 @@
 ## 常用 ui 控件 (View 子类)
 
+### 基础知识
+
+android的view的部分属性关系
+
+![1653634042786](常用ui控件.assets/1653634042786.png)
+
+html的才是原图, android是图中修改过的
+
+
+
 ### TextView
 
 ### button
-
-
 
 java 代码中使用`button.setOnClickListener(new MyOnClickListener)`
 
@@ -214,6 +222,24 @@ listView.setAdapter(adapter);
 
 ### RecyclerView
 
+### dialog对话框
+
+`Dialog` 类是对话框的基类，但您应避免直接实例化 `Dialog`，而是应使用下列子类之一：
+
+- `AlertDialog`
+
+  此对话框可显示标题、按钮（最多三个）、选项列表或自定义布局。
+
+- `DatePickerDialog` 或 `TimePickerDialog`
+
+  此对话框带有允许用户选择日期或时间的预定义界面。
+
+应使用 `DialogFragment` 作为对话框的容器。`DialogFragment` 类提供创建对话框和管理其外观所需的所有控件，而非调用 `Dialog` 对象上的方法。
+
+使用 `DialogFragment` 来管理对话框可确保对话框能正确处理各种生命周期事件，如用户按“返回”按钮或旋转屏幕时。此外，`DialogFragment` 类还允许您以可嵌入组件的形式在较大界面中重复使用对话框的界面，类似于传统的 `Fragment`（例如，当您想让对话框界面在大屏幕和小屏幕上具有不同外观时）。
+
+
+
 
 
 ### Fragment
@@ -274,13 +300,13 @@ fragment必须嵌入到 AndroidX  FragmentActivity 才能提供ui显示, 而AppC
 
 如果通过代码动态添加就不要在xml中设置android:name属性
 
-```
-    if(savedInstanceState == null){
-      getSupportFragmentManager().beginTransaction()
-              .setReorderingAllowed(true)
-              .add(R.id.main_my_fragment_code,MyFragment.class,null)
-              .commit();
-    }
+```java
+if(savedInstanceState == null){
+getSupportFragmentManager().beginTransaction()
+.setReorderingAllowed(true)
+.add(R.id.main_my_fragment_code,MyFragment.class,null)
+.commit();
+}
 ```
 
 #### google提供的方便使用的fragment的子类

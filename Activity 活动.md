@@ -99,7 +99,9 @@ public class MainActivity extends AppCompatActivity {
 - onDestroy:销毁页面 , 把页面从内存中清除掉 
 - onRestart:重启页面 , 重新加载内存中的页面数据
 
-例子 (Sample)
+![image-20220514181720475](Activity 活动.assets/image-20220514181720475.png)
+
+实际调用顺序
 
 1. 打开页面调用
 
@@ -121,39 +123,118 @@ public class MainActivity extends AppCompatActivity {
 
    
 
-3. 竖屏与横屏的切换
+3. 竖屏与横屏的切换 
 
    打开时竖屏 -> 横屏 -> 竖屏
 
-   ![image-20210131121950952](https://gitee.com/kevinzhang1999/my-picture/raw/master/uPic/image-20210131121950952.png)
+   ![image-20210131121950952](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210131121950952.png)
 
 4. 进入页面后返回桌面再进入
 
-![image-20210131121531481](https://gitee.com/kevinzhang1999/my-picture/raw/master/uPic/image-20210131121531481.png)
-
-
-
-### 返回栈
-
-### 启动模式
-
-standard
-
-singleTop
-
-活动处于栈顶时不再创建,使用已有的activity; 若不在栈顶, 则创建
-
-singleTask
-
-系统在返回栈中查找活动的实例, 若有, 在其之前的活动全部弹栈, 使用此实例
-
-singleInstance
-
-启用一个新的返回栈管理此活动
-
-### 启动活动的最佳写法
+![image-20210131121531481](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210131121531481.png)
 
 
 
 ### activity的状态保存
+
+#### bundle对象 
+
+> A mapping from String keys to various `Parcelable` values.
+
+以键值对存储数据
+
+其主要用来传递数据, 当传递对象或对象数组时, 对象必须实现[Serializable 或Parcelable](http://blog.csdn.net/mer1234567/article/details/7841657)接口( 此接口的方法可以将类序列化存放和反序列化取出)
+
+在activity之间传递基本类型示例
+
+```java
+// "com.test" is the package name of the destination class
+// "com.test.Activity02" is the full class path of the destination class
+Intent intent = new Intent().setClassName("com.bundletest", "com.bundletest.Bundle02");
+
+Bundle bundle = new Bundle();
+bundle.putString("name", "skywang");
+bundle.putInt("height", 175);
+intent.putExtras(bundle);
+
+startActivity(intent);
+
+// end current class
+finish();
+```
+
+```java
+Bundle bundle = this.getIntent().getExtras();  
+  
+String name = bundle.getString("name");  
+int height = bundle.getInt("height");
+```
+
+传递Parcelable类型的对象
+
+> 通过 intent 发送数据时，应小心地将数据大小限制为几 KB。发送过多数据会导致系统抛出 `TransactionTooLargeException` 异常。
+
+#### 状态保存
+
+只有activity异常终止时才会调用onSaveInstanceState(Bundle outState) , 在此保存数据到bundle中
+
+当activity被重新创建后, 系统调用onRestoreInstanceState(), 并将bundle对象传递给其和onCreate()
+
+![image-20220514184740253](Activity 活动.assets/image-20220514184740253.png)
+
+### task任务和backStack返回栈
+
+task任务是用户在执行某项工作时与之互动的一系列 Activity 的集合
+
+这些 Activity 按照每个 Activity 打开的顺序排列在一个返回堆栈中
+
+一般来说, 谁打开的activity, 新的activity就会在启用它的activity所在的栈中运行
+
+
+
+### 启动模式
+
+两种方式定义不同的启动模式：
+
+1. 使用清单文件
+
+​	使用 `<activity> `元素的 launchMode 属性
+
+2. 使用 Intent 标记
+
+​	调用 `startActivity()` 时，可以在 `Intent` 中添加一个标记, intent.setFlags()
+
+> intent的优先级较高, 两者的包含的启动模式范围有所不同
+
+
+
+#### standard
+
+默认值。
+
+系统在启动该 Activity 的任务中创建 Activity 的新实例，并将 intent 传送给该实例。
+
+Activity 可以多次实例化，每个实例可以属于不同的任务，一个任务可以拥有多个实例。
+
+#### singleTop
+
+活动处于栈顶时不再创建,使用已有的activity,调用其 `onNewIntent()` 方法来将 intent 转送给该实例 
+
+若不在栈顶, 则创建
+
+#### singleTask
+
+![image-20220514185242811](Activity 活动.assets/image-20220514185242811.png)
+
+#### singleInstance
+
+启用一个新的返回栈管理此活动, 栈中只会有此一个activity, 由该 Activity 启动的任何 Activity 都会在其他的任务中打开。
+
+#### TaskAffinity
+
+任务喜好, activity的taskAffinity没指明则为Application指明的taskAffinity, 若application也没指明则为应用报名
+
+
+
+### 
 

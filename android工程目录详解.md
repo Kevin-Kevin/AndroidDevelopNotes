@@ -7,15 +7,24 @@
 
 - java 
   - 有三个包, 一个是源码, 其他是测试用的
+  
 - res
   - drawable 
+  
   - layout : app 页面布局
+  
   - mipmap : 启动图标
-  - values : 常量定义文件
+  
+  - values : 常量定义文件, 实际上以下xml的文件根节点都是Resource, 说明以下节点可以在任何values/ 文件夹内的文件中
     - strings.xml
     - dimens.xml
     - colors.xml
     - styles.xml
+  
+  - 
+  
+    
+  
 - Gradle Scripts
   - build.gradle  : app 工程编译规则 , 分为项目级和模块级
   - proguard-rules.pro 
@@ -23,5 +32,7 @@
   - settings.gradle
   - local.properties
 
+### layout
 
+### style
 

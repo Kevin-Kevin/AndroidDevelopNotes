@@ -294,11 +294,11 @@ public class MainActivity extends AppCompatActivity {
 
    打开时竖屏 -> 横屏 -> 竖屏
 
-   ![image-20210131121950952](https://gitee.com/kevinzhang1999/my-picture/raw/master/uPic/image-20210131121950952.png)
+   ![image-20210131121950952](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210131121950952.png)
 
 4. 进入页面后返回桌面再进入
 
-![image-20210131121531481](https://gitee.com/kevinzhang1999/my-picture/raw/master/uPic/image-20210131121531481.png)
+![image-20210131121531481](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210131121531481.png)
 
 
 
@@ -322,7 +322,7 @@ intent 中带有信息, 传递给被调用的组件
 
 - Data : 既 Uri , 和 action 配合使用 , 指定 action 要操作的数据**路径**
 
-  ![image-20210410150421368](https://gitee.com/kevinzhang1999/my-picture/raw/master/uPic/image-20210410150421368-1618038261669.png)
+  ![image-20210410150421368](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210410150421368-1618038261669.png)
 
 - Type ; 用于指定 Data 类型的定义
 
@@ -516,7 +516,7 @@ unregisterReceiver(receiver);      //注销动态广播接收器
 
 #### handler 消息机制
 
-![image-20210820185729520](https://gitee.com/kevinzhang1999/my-picture/raw/master/uPic/image-20210820185729520-1629457049881.png)
+![image-20210820185729520](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210820185729520-1629457049881.png)
 
 每个线程各自的 looper 从各自的 messageQueue 中取出 message
 
@@ -1774,7 +1774,7 @@ app 要获取受限数据或者受限操作, 必须请求权限
 
 [权限 API 参考文档页面](https://developer.android.com/reference/android/Manifest.permission?hl=zh-cn) 包含了所有的权限
 
-![image-20210922150331180](https://gitee.com/KevinZhang1999/my-picture/raw/master/uPic/202109221503402.png)
+![image-20210922150331180](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/202109221503402.png)
 
 ### 权限类型
 
