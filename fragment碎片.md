@@ -1,6 +1,18 @@
 ## Fragment
 
-[`Fragment`](https://developer.android.com/reference/androidx/fragment/app/Fragment?hl=zh-cn) 表示应用界面中可重复使用的一部分。Fragment 定义和管理自己的布局，具有自己的生命周期，并且可以处理自己的输入事件。Fragment 不能独立存在，而是必须由 Activity 或另一个 Fragment 托管
+```java
+public class Fragment implements ComponentCallbacks, View.OnCreateContextMenuListener, LifecycleOwner, ViewModelStoreOwner, HasDefaultViewModelProviderFactory, SavedStateRegistryOwner, ActivityResultCaller
+```
+
+[`Fragment`](https://developer.android.com/reference/androidx/fragment/app/Fragment?hl=zh-cn) 表示比view复杂, 比activity更轻量级
+
+Fragment 定义和管理自己的布局，具有自己的生命周期，并且可以处理自己的输入事件
+
+Fragment 不能独立存在，而是必须由 Activity 或另一个 Fragment 作为宿主
+
+当 Activity 处于 `STARTED` [生命周期状态](https://developer.android.com/guide/components/activities/activity-lifecycle)或更高的状态时，可以添加、替换或移除 Fragment
+
+可以将记录保留在由 Activity 管理的返回堆栈中，从而允许撤消这些更改
 
 ### fragment的创建
 
@@ -71,6 +83,10 @@ if(savedInstanceState == null){
         .commit();
 }
 ```
+
+#### 向fragment中传递参数
+
+
 
 ### Fragment的生命周期
 

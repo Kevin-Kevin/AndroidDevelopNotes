@@ -16,13 +16,35 @@ intent 中带有信息, 传递给被调用的组件
 
   ![image-20210410150421368](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210410150421368-1618038261669.png)
 
-- Type ; 用于指定 Data 类型的定义
+- Type : 用于指定 Data 类型的定义
 
-- 
+- Extras : 拓展信息
 
-- Extras
+- Flags : 指定intent的运行模式
 
-- Flags
+#### 常用方法
+
+setData()
+
+setDataAndType()
+
+putExtra() 
+
+>  参数是一个string 加基本类型, 序列化对象, 他们的数组, bundle 
+
+putExtras(bundle)
+
+> **Bundle**主要用于传递数据
+>
+> 其数据，是以**key-value(键值对)**的形式存在的。
+>
+> 经常使用Bundle**在Activity之间传递数据**
+>
+> 传递的数据可以是boolean、byte、int、long、float、double、string等基本类型或它们对应的数组，也可以是对象或对象数组。
+>
+> 当Bundle传递的是对象或对象数组时，必须对象类实现Serializable 或Parcelable接口
+
+
 
 ### 显式 intent
 

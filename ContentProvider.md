@@ -31,6 +31,12 @@ content://com.wang.provider.myprovider/tablename/id：
 
 con媒体类型（通常称为 Multipurpose Internet Mail Extensions 或 MIME 类型 ）是一种标准，用来**表示文档、文件或字节流的性质和格式**。它在IETF RFC 6838中进行了定义和标准化。
 
+ContentProvider
+
+
+
+
+
 ### contentResolver
 
 ContentResolver 可提供持久性存储空间的基本“CRUD”（创建、检索、更新和删除）功能

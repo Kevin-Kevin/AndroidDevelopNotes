@@ -33,52 +33,6 @@
 
 这几种方式的原理都是通过handler消息机制来更新ui
 
-#### handler 消息机制
-
-![image-20210820185729520](https://raw.githubusercontent.com/Kevin-Kevin/pictureBed/master/uPic/image-20210820185729520-1629457049881.png)
-
-![image-20220513190120030](Service 服务, fragment, thread.assets/image-20220513190120030.png)
-
-每个线程各自的 looper 从各自的 messageQueue 中取出 message
-
-一个 handler 和一个 looper 绑定, 可以通过 handler 发送 message 给 looper 所属的线程, 并且handler 的`run()`负责处理发送给本线程的 message
-
-ui 主线程自带一个 looper, 其余线程必须自己创建并启动 looper
-
-Looper内部使用了threadLocal来记录不同线程对应的looper
-
-#### handler的使用
-
-![image-20220513191102569](Service 服务, fragment, thread.assets/image-20220513191102569.png)
-
-> Android开发艺术探索
-
-thread1调用thread2的handler 发送消息给 MessageQueue
-
-实际上是thread1调用 MessageQueue的enqueueMessage方法
-
-thread2的looper就会注意到消息并处理
-
-```java
-// 一个Looper线程实现的典型例子
-// 使用分离prepare()和loop()创建初始Handler与Looper进行通信 
-class LooperThread extends Thread {
-      public Handler mHandler;
-
-      public void run() {
-          Looper.prepare();
-
-          mHandler = new Handler(Looper.myLooper()) {
-              public void handleMessage(Message msg) {
-                  // process incoming messages here
-              }
-          };
-
-          Looper.loop();
-      }
-  }
-```
-
 
 
 ### 服务概述
@@ -105,7 +59,7 @@ Service的运行不依赖于任何用户界面，即使程序被切换到后台,
 
 ### 服务的生命周期
 
-#### 启动服务的周期
+#### `启动服务`的周期
 
 该服务在其他组件调用 `startService()` 时创建，然后无限期运行，且必须通过调用 `stopSelf()` 来自行停止运行
 
@@ -113,11 +67,11 @@ Service的运行不依赖于任何用户界面，即使程序被切换到后台,
 
 服务停止后，系统会将其销毁。
 
-#### 绑定服务的周期
+#### `绑定服务`的周期
 
-该服务在其他组件（客户端）调用 `bindService()` 时创建。然后，客户端通过 `IBinder` 接口与服务进行通信。客户端可通过调用 `unbindService()` 关闭连接。多个客户端可以绑定到相同服务，而且当所有绑定全部取消后，系统即会销毁该服务。（服务*不必*自行停止运行。）
+该服务在其他组件（客户端）调用 `bindService()` 时创建。然后，客户端通过 `IBinder` 接口与服务进行通信。客户端可通过调用 `unbindService()` 关闭连接。多个客户端可以绑定到相同服务，而且当所有绑定全部取消后，系统即会销毁该服务。（服务不用自行停止运行。）
 
-#### 启动加绑定的服务的周期
+#### `启动加绑定`的服务的周期
 
 即使所有客户端解绑, 还是要使用`stopService()`来停止服务
 
@@ -135,7 +89,7 @@ Service的运行不依赖于任何用户界面，即使程序被切换到后台,
 
 多个服务启动请求会导致多次对服务的 `onStartCommand()` 进行相应的调用。
 
-> `onStartCommand()`的返回值说明
+> `onStartCommand()`的返回值说明系统如何处理被异常杀掉的进程
 >
 > ![image-20220519191718540](Service 服务, thread.assets/image-20220519191718540.png)
 
@@ -199,11 +153,11 @@ Service的运行不依赖于任何用户界面，即使程序被切换到后台,
 #### 启动
 
 ```java
-Intent startService = new Intent(this, MyService.class);
+Intent startService = new Intent(getApplicationContext(), MyService.class);
 startService(startService);
 
 Intent stopService = new Intent(this, MyService.class);
-startService(stopService);
+stopService(stopService);
 ```
 
 #### 停止
@@ -313,6 +267,12 @@ activity
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 ```
 
+前台服务必须先被启动, 并且要用startForegroundService
+
+
+
+
+
 - startForeground：把当前服务切换到前台运行
 
   第一个参数表示通知的编号
@@ -323,3 +283,21 @@ activity
 
   参数为true表示清除通知，参数为false表示不清除
 
+```java
+// 注意 : notification里面要加contentIntent
+// 这里的Intent要用 PendingIntent
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent =
+        PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+Notification notification =
+          new Notification.Builder(this, CHANNEL_DEFAULT_IMPORTANCE)
+    .setContentTitle(getText(R.string.notification_title))
+    .setContentText(getText(R.string.notification_message))
+    .setSmallIcon(R.drawable.icon)
+    .setContentIntent(pendingIntent)
+    .setTicker(getText(R.string.ticker_text))
+    .build();
+
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+```

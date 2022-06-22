@@ -109,15 +109,15 @@ public class MainActivity extends AppCompatActivity {
 
 2. 页面跳转调用
 
-   - 打开页面
+   打开页面
 
    ![image-20210131121658107](Android 开发笔记.assets/image-20210131121658107.png)
 
-   - 跳转页面
+   跳转页面
 
    ![image-20210131121726442](Android 开发笔记.assets/image-20210131121726442.png)
 
-   - 返回页面
+   返回页面
 
    ![image-20210131121736347](Android 开发笔记.assets/image-20210131121736347.png)
 
@@ -184,15 +184,25 @@ int height = bundle.getInt("height");
 
 ### task任务和backStack返回栈
 
+安卓最近任务列表中放的就是一个个task
+
+最近任务列表中不一定或者的task
+
 task任务是用户在执行某项工作时与之互动的一系列 Activity 的集合
 
 这些 Activity 按照每个 Activity 打开的顺序排列在一个返回堆栈中
 
-一般来说, 谁打开的activity, 新的activity就会在启用它的activity所在的栈中运行
+默认情况 : 在不同的task中打开的activity, 新的activity的新实例就放在那个task中
 
 
 
 ### 启动模式
+
+
+
+
+
+
 
 两种方式定义不同的启动模式：
 
@@ -218,7 +228,7 @@ Activity 可以多次实例化，每个实例可以属于不同的任务，一�
 
 #### singleTop
 
-活动处于栈顶时不再创建,使用已有的activity,调用其 `onNewIntent()` 方法来将 intent 转送给该实例 
+活动处于当前栈顶时不再创建,使用已有的activity,调用其 `onNewIntent()` 方法来将 intent 转送给该实例 
 
 若不在栈顶, 则创建
 
@@ -226,15 +236,51 @@ Activity 可以多次实例化，每个实例可以属于不同的任务，一�
 
 ![image-20220514185242811](Activity 活动.assets/image-20220514185242811.png)
 
+a如果在栈中有实例并且上面压入了别的activity
+
+上面的会被清除掉
+
+系统会把a所在的task压在当前task上
+
+task的叠加只限于前台task, 进入后台就分开
+
+> task由前台进入后台的情况
+>
+> 1. 用户按下home键
+> 2. 按下最近任务键, 马上进入后台
+
 #### singleInstance
 
-启用一个新的返回栈管理此活动, 栈中只会有此一个activity, 由该 Activity 启动的任何 Activity 都会在其他的任务中打开。
+启用一个新的返回栈管理此活动, 栈中只会有此一个activity,
+
+这个新的task同样会压在原来的task上
+
+由该 Activity 启动的任何 Activity 都会在其他的tas中打开，然后压过来
+
+
 
 #### TaskAffinity
 
-任务喜好, activity的taskAffinity没指明则为Application指明的taskAffinity, 若application也没指明则为应用报名
+任务喜好
 
+activity的taskAffinity没指明则为Application指明的taskAffinity
 
+若application也没指明则为应用报名  
 
-### 
+一个app只能有一个task显示在最近任务列表
 
+![image-20220613154618668](Activity 活动.assets/image-20220613154618668.png)
+
+对launchMode="singleTask"的活动生效
+
+![image-20220613154432102](Activity 活动.assets/image-20220613154432102.png)
+
+### allowTaskReparenting
+
+> android9失效, android11后又好了
+>
+> ⚠ 最好不要用
+
+打开时在打开的task上
+
+稍后会回到原本所属的task上
